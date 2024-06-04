@@ -21,8 +21,13 @@ let movables;
 let renderables;
 let lvl = 0;
 
+let movableChar;
+
+let battleZones = [];
+
 let characters = [];
 
+// Загрузка изображений игрока
 const playerDownImage = new Image();
 playerDownImage.src = "./img/playerDown.png";
 
@@ -35,6 +40,7 @@ playerLeftImage.src = "./img/playerLeft.png";
 const playerRightImage = new Image();
 playerRightImage.src = "./img/playerRight.png";
 
+// Создание игрока
 const player = new Sprite({
 	position: {
 		x: canvas.width / 2 - 192 / 4 / 2,
@@ -52,14 +58,7 @@ const player = new Sprite({
 		down: playerDownImage,
 	},
 });
-const villagerImg = new Image();
-villagerImg.src = "./img/villager/Idle.png";
 
-const portalImg = new Image();
-portalImg.src = "./img/portal.png";
-
-const oldManImg = new Image();
-oldManImg.src = "./img/oldMan/Idle.png";
 let level = 1;
 let levels = [
 	{
@@ -68,7 +67,7 @@ let levels = [
 			portal = [];
 			// player.position.x = canvas.width / 2 - 192 / 4 / 2;
 			// player.position.y = canvas.height / 2 - 68 / 2;
-
+			// Парсинг карты столкновений и создание объектов
 			collisionsMap = parse2D(collisions_level1);
 			collisionBlocks = createObjectsFrom2D(collisionsMap);
 
@@ -77,7 +76,7 @@ let levels = [
 
 			image = new Image();
 			image.src = "./img/Pellet Town.png";
-
+			// Создание фона и переднего плана
 			background = new Sprite({
 				position: {
 					x: offset.x,
@@ -93,7 +92,16 @@ let levels = [
 				},
 				image: foregroundImage,
 			});
+			// Загрузка изображений персонажей
+			const villagerImg = new Image();
+			villagerImg.src = "./img/villager/Idle.png";
 
+			const portalImg = new Image();
+			portalImg.src = "./img/portal.png";
+
+			const oldManImg = new Image();
+			oldManImg.src = "./img/oldMan/Idle.png";
+			// Создание портала
 			portal.push(
 				new Reaction({
 					position: {
@@ -111,14 +119,15 @@ let levels = [
 						console.log("OK");
 						levels[1].init();
 					},
+					// dialogue: ["...", "Hey mister, have you seen my Doggochu?"],
 				}),
 			);
-
+			// Создание персонажей
 			characters.push(
 				new Character({
 					position: {
-						x: 177,
-						y: 80,
+						x: 515,
+						y: 438,
 					},
 					image: oldManImg,
 					frames: {
@@ -129,11 +138,73 @@ let levels = [
 					dialogue: ["My bones hurt."],
 				}),
 			);
+			// Создание персонажей
+			characters.push(
+				new Character({
+					position: {
+						x: 615,
+						y: 338,
+					},
+					image: villagerImg,
+					frames: {
+						max: 4,
+						hold: 60,
+					},
+					scale: 3,
+					dialogue: ["My bones hurt."],
+				}),
+			);
 
-			movables = [background, ...boundaries, foreground, ...characters, ...portal];
-			renderables = [background, ...boundaries, ...characters, ...portal, player, foreground];
+			// Создаем экземпляр MovableCharacter
+			movableChar = new MovableCharacter({
+				position: { x: 100, y: 100 },
+				velocity: { x: 2, y: 2 }, // Настройте скорость по вашему усмотрению
+				image: playerDownImage,
+				frames: { max: 4, hold: 10 },
+				sprites: {
+					up: playerUpImage,
+					left: playerLeftImage,
+					right: playerRightImage,
+					down: playerDownImage,
+				},
+				animate: true,
+				rotation: 0,
+				scale: 1,
+				dialogue: ["Привет, я персонаж!"],
+				path: [
+					// Задаем путь, по которому будет двигаться персонаж
+					{ x: 100, y: 100 },
+					{ x: 300, y: 100 },
+					{ x: 300, y: 300 },
+					{ x: 100, y: 300 },
+					{ x: 100, y: 100 },
+				],
+			});
+			// characters.push(movableChar);
+
+			// Установка объектов, которые можно перемещать и отрисовывать
+			movables = [
+				background,
+				...boundaries,
+				foreground,
+				...battleZones,
+				...characters,
+				...portal,
+				movableChar,
+			];
+			renderables = [
+				background,
+				...boundaries,
+				...battleZones,
+				...characters,
+				...portal,
+				player,
+				foreground,
+				movableChar,
+			];
 		},
 	},
+	// 2 уровень
 	{
 		init: () => {
 			boundaries = [];
@@ -152,6 +223,11 @@ let levels = [
 				},
 				image: image,
 			});
+			// player.position.x = canvas.width / 2 - 192 / 4 / 2;
+			// player.position.y = canvas.height / 2 - 68 / 2;
+			const portalImg = new Image();
+			portalImg.src = "./img/portal.png";
+
 			portal.push(
 				new Reaction({
 					position: {
@@ -169,13 +245,12 @@ let levels = [
 						console.log("OK");
 						levels[0].init();
 					},
+					// dialogue: ["...", "Hey mister, have you seen my Doggochu?"],
 				}),
 			);
-			// player.position.x = canvas.width / 2 - 192 / 4 / 2;
-			// player.position.y = canvas.height / 2 - 68 / 2;
 
 			movables = [background, ...boundaries, ...portal];
-			renderables = [background, ...boundaries, player, ...portal];
+			renderables = [background, ...boundaries, ...portal, player];
 		},
 	},
 ];
@@ -196,14 +271,19 @@ const keys = {
 };
 
 function animate() {
+	// Функция анимации
 	const animationId = window.requestAnimationFrame(animate);
+	// Отрисовка всех объектов
 	renderables.forEach((renderable) => {
 		renderable.draw();
 	});
 
+	movableChar.update();
+
 	let moving = true;
 	player.animate = false;
 
+	// Обработка ввода и движение игрока
 	if (keys.w.pressed && lastKey === "w") {
 		player.animate = true;
 		player.image = player.sprites.up;
@@ -338,9 +418,11 @@ function animate() {
 			});
 	}
 }
+// Инициализация первого уровня и запуск анимации
 levels[lvl].init();
 animate();
 
+// Обработка нажатия кнопки для смены уровней
 const btn = document.querySelector("button");
 
 btn.addEventListener("click", function () {

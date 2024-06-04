@@ -9,8 +9,8 @@ class Reaction extends Character {
 		rotation = 0,
 		scale = 1,
 		onComplete,
-		// dialogue = [""],
 	}) {
+		// Вызов конструктора родительского класса Character
 		super({
 			position,
 			velocity,
@@ -22,18 +22,22 @@ class Reaction extends Character {
 			scale,
 		});
 
-		// this.dialogue = dialogue;
+		// Устанавливаем функцию, которая будет вызвана при завершении
 		this.onComplete = onComplete;
+		// Индекс текущего диалога (может использоваться в будущем)
 		this.dialogueIndex = 0;
 	}
 
+	// Метод для отрисовки объекта на холсте
 	draw() {
+		// Закомментированные строки для сохранения состояния холста и трансформации
 		// c.save();
 		// c.translate(this.position.x + this.width / 2, this.position.y + this.height / 2);
 		// c.rotate(this.rotation);
 		// c.translate(-this.position.x - this.width / 2, -this.position.y - this.height / 2);
 		// c.globalAlpha = this.opacity;
 
+		// Расчет области кадра для отрисовки
 		const crop = {
 			position: {
 				x: this.frames.val * (this.width / this.scale),
@@ -43,6 +47,7 @@ class Reaction extends Character {
 			height: this.image.height,
 		};
 
+		// Позиция и размер изображения на холсте
 		const image = {
 			position: {
 				x: this.position.x,
@@ -52,6 +57,7 @@ class Reaction extends Character {
 			height: this.image.height,
 		};
 
+		// Отрисовка изображения на холсте
 		c.drawImage(
 			this.image,
 			crop.position.x,
@@ -63,22 +69,30 @@ class Reaction extends Character {
 			image.width * this.scale,
 			image.height * this.scale,
 		);
+
+		// Отрисовка прямоугольника для отладки (показывает границы объекта)
 		c.fillStyle = "rgba(255, 255, 0, 0.5)";
 		c.fillRect(this.position.x, this.position.y, this.width, this.height);
 
+		// Восстановление состояния холста после трансформации (закомментировано выше)
 		c.restore();
 
+		// Если анимация не включена, выходим из метода
 		if (!this.animate) return;
 
+		// Увеличиваем счетчик кадров, если анимация включена
 		if (this.frames.max > 1) {
 			this.frames.elapsed++;
 		}
 
+		// Смена кадра анимации
 		if (this.frames.elapsed % this.frames.hold === 0) {
 			if (this.frames.val < this.frames.max - 1) this.frames.val++;
 			else this.frames.val = 0;
 		}
 	}
+
+	// Метод для выполнения действия при завершении
 	play() {
 		console.log("onComplete");
 		this.onComplete();

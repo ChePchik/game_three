@@ -1,7 +1,7 @@
 class Sprite {
 	constructor({
 		position,
-		velocity,
+		// velocity,
 		image,
 		frames = { max: 1, hold: 10 },
 		sprites,
@@ -28,11 +28,16 @@ class Sprite {
 
 	draw() {
 		c.save();
+
+		// Перемещение и вращение холста относительно центра спрайта
 		c.translate(this.position.x + this.width / 2, this.position.y + this.height / 2);
 		c.rotate(this.rotation);
 		c.translate(-this.position.x - this.width / 2, -this.position.y - this.height / 2);
+
+		// Установка прозрачности спрайта
 		c.globalAlpha = this.opacity;
 
+		// Расчёт области изображения для кадра анимации
 		const crop = {
 			position: {
 				x: this.frames.val * (this.width / this.scale),
@@ -51,6 +56,7 @@ class Sprite {
 			height: this.image.height,
 		};
 
+		// Отрисовка кадра анимации с учётом масштаба
 		c.drawImage(
 			this.image,
 			crop.position.x,
@@ -68,11 +74,11 @@ class Sprite {
 		c.restore();
 
 		if (!this.animate) return;
-
+		// Анимация кадров (если включена)
 		if (this.frames.max > 1) {
 			this.frames.elapsed++;
 		}
-
+		// Смена кадра анимации
 		if (this.frames.elapsed % this.frames.hold === 0) {
 			if (this.frames.val < this.frames.max - 1) this.frames.val++;
 			else this.frames.val = 0;

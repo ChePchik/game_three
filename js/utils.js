@@ -1,3 +1,4 @@
+// Функция для проверки столкновения двух прямоугольников
 function rectangularCollision({ rectangle1, rectangle2 }) {
 	return (
 		rectangle1.position.x + rectangle1.width >= rectangle2.position.x &&
@@ -7,9 +8,12 @@ function rectangularCollision({ rectangle1, rectangle2 }) {
 	);
 }
 
+// Функция для проверки столкновения игрока с персонажами
 function checkForCharacterCollision({ characters, player, characterOffset = { x: 0, y: 0 } }) {
+	// Сбрасываем текущее взаимодействие игрока
 	player.interactionAsset = null;
-	// monitor for character collision
+
+	// Проверяем столкновение с каждым персонажем
 	for (let i = 0; i < characters.length; i++) {
 		const character = characters[i];
 
@@ -25,26 +29,29 @@ function checkForCharacterCollision({ characters, player, characterOffset = { x:
 				},
 			})
 		) {
+			// Если обнаружено столкновение, устанавливаем текущего персонажа как объект взаимодействия
 			player.interactionAsset = character;
 			break;
 		}
 	}
 }
+
+// Функция для разбора данных в двумерный массив
 function parse2D(data) {
 	const rows = [];
 	for (let i = 0; i < data.length; i += 70) {
 		rows.push(data.slice(i, i + 70));
 	}
-
 	return rows;
 }
 
+// Функция для создания объектов из двумерного массива данных
 function createObjectsFrom2D(data) {
 	const objects = [];
 	data.forEach((row, i) => {
 		row.forEach((symbol, j) => {
 			if (symbol === 1025) {
-				// push a new collision into collisionblocks array
+				// Если символ соответствует значению 1025, добавляем новый блок столкновения в массив boundaries
 				boundaries.push(
 					new CollisionBlock({
 						position: {
@@ -56,6 +63,5 @@ function createObjectsFrom2D(data) {
 			}
 		});
 	});
-
 	return objects;
 }
